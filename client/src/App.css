@@ -680,12 +680,48 @@ table.data th {
   word-break: break-all;
 }
 
-.scheme-file-row {
+.scheme-file-toolbar {
+  margin-bottom: 0.75rem;
+}
+
+.scheme-file-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+  font-weight: 500;
+}
+
+.scheme-file-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.scheme-file-select {
+  flex: 1 1 12rem;
+  max-width: 22rem;
+  min-width: 10rem;
+}
+
+.scheme-file-controls .ui-select {
+  min-height: 2.375rem;
+  box-sizing: border-box;
+}
+
+.scheme-file-new-btn {
+  flex-shrink: 0;
+  min-height: 2.375rem;
+  box-sizing: border-box;
+}
+
+.scheme-file-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
-  margin-bottom: 0.75rem;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
 }
 
 .new-scheme-panel {
@@ -694,6 +730,10 @@ table.data th {
   border-radius: 8px;
   border: 1px dashed var(--border);
   background: var(--bg-input);
+}
+
+.new-scheme-panel .field:last-child {
+  margin-bottom: 0;
 }
 
 .db-preview {

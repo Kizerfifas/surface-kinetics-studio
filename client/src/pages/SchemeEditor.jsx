@@ -323,10 +323,10 @@ export default function SchemeEditor() {
       {message && <div className="alert alert-success">{message}</div>}
 
       <div className="card">
-        <div className="scheme-file-row">
-          <div className="field" style={{ flex: 1, maxWidth: 360 }}>
-            <label>Файл схемы</label>
-            <SelectWrap>
+        <div className="scheme-file-toolbar">
+          <span className="scheme-file-label">Файл схемы</span>
+          <div className="scheme-file-controls">
+            <SelectWrap className="scheme-file-select">
               <select
                 className="ui-select"
                 value={filename}
@@ -344,15 +344,14 @@ export default function SchemeEditor() {
                 ))}
               </select>
             </SelectWrap>
+            <button
+              type="button"
+              className="btn btn-primary scheme-file-new-btn"
+              onClick={() => setNewOpen((v) => !v)}
+            >
+              {newOpen ? 'Отмена' : '+ Новая схема'}
+            </button>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            style={{ alignSelf: 'flex-end' }}
-            onClick={() => setNewOpen((v) => !v)}
-          >
-            {newOpen ? 'Отмена' : '+ Новая схема'}
-          </button>
         </div>
 
         {newOpen && (
@@ -389,7 +388,7 @@ export default function SchemeEditor() {
           </div>
         )}
 
-        <div className="btn-row">
+        <div className="scheme-file-actions">
           <button type="button" className="btn btn-primary" onClick={saveFromForm}>
             Сохранить (форма)
           </button>
