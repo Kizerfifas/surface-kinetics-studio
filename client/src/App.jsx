@@ -1,4 +1,5 @@
 import { Routes, Route, NavLink } from 'react-router-dom';
+import ThemeToggle from './components/ThemeToggle';
 import SchemeEditor from './pages/SchemeEditor';
 import ConfigEditor from './pages/ConfigEditor';
 import RunPanel from './pages/RunPanel';
@@ -30,6 +31,9 @@ export default function App() {
             Результаты
           </NavLink>
         </nav>
+        <div className="sidebar-footer">
+          <ThemeToggle />
+        </div>
       </aside>
       <main className="main">
         <Routes>

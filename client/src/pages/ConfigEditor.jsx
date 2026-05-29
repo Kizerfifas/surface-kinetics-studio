@@ -25,7 +25,7 @@ function NumInput({ label, value, onChange, step = 'any' }) {
         step={step}
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
-        className="mono"
+        className="ui-input mono"
       />
     </div>
   );
@@ -86,7 +86,11 @@ function ElementsSection({ elements, onChange }) {
           <div className="grid-3">
             <div className="field field-compact">
               <label>Имя</label>
-              <input value={el.name} onChange={(e) => updateEl(idx, 'name', e.target.value)} />
+              <input
+                className="ui-input"
+                value={el.name}
+                onChange={(e) => updateEl(idx, 'name', e.target.value)}
+              />
             </div>
             <NumInput label="sort" value={el.sort} onChange={(v) => updateEl(idx, 'sort', v)} step="1" />
             <NumInput label="mass" value={el.mass} onChange={(v) => updateEl(idx, 'mass', v)} />
@@ -155,38 +159,55 @@ function QuasiSteadySection({ simulating, onSimulatingChange }) {
         />
       </div>
 
-      <h4 style={{ marginTop: '1rem', fontSize: '0.95rem' }}>checkParameters</h4>
+      <h4>checkParameters</h4>
       <p className="hint">
         Скользящее среднее по последним <code>valuesWindowSize</code> точкам; остановка, если
         отклонение &lt; tolerance (%). Для двухкомпонентной системы обычно смотрят суммарный{' '}
         <code>densityF</code>.
       </p>
       {params.map((p, i) => (
-        <div key={i} className="scheme-row">
-          <select value={p.name} onChange={(e) => updateParam(i, 'name', e.target.value)}>
-            {CHECK_PARAM_NAMES.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            className="mono"
-            value={p.tolerance}
-            onChange={(e) => updateParam(i, 'tolerance', Number(e.target.value))}
-            placeholder="tolerance %"
-            style={{ width: '6rem' }}
-          />
-          <input
-            type="number"
-            className="mono"
-            value={p.valuesWindowSize}
-            onChange={(e) => updateParam(i, 'valuesWindowSize', Number(e.target.value))}
-            placeholder="окно"
-            style={{ width: '6rem' }}
-          />
-          <button type="button" className="btn" onClick={() => removeParam(i)}>
+        <div key={i} className="param-card">
+          <div className="param-card-fields">
+            <label className="param-field">
+              <span>Параметр</span>
+              <select
+                className="ui-select"
+                value={p.name}
+                onChange={(e) => updateParam(i, 'name', e.target.value)}
+              >
+                {CHECK_PARAM_NAMES.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="param-field">
+              <span>tolerance, %</span>
+              <input
+                type="number"
+                className="ui-input mono"
+                value={p.tolerance}
+                onChange={(e) => updateParam(i, 'tolerance', Number(e.target.value))}
+              />
+            </label>
+            <label className="param-field">
+              <span>valuesWindowSize</span>
+              <input
+                type="number"
+                className="ui-input mono"
+                value={p.valuesWindowSize}
+                onChange={(e) => updateParam(i, 'valuesWindowSize', Number(e.target.value))}
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            className="btn btn-icon"
+            onClick={() => removeParam(i)}
+            title="Удалить"
+            aria-label="Удалить параметр"
+          >
             ×
           </button>
         </div>
@@ -314,6 +335,7 @@ export default function ConfigEditor() {
             <div className="field" style={{ maxWidth: 360 }}>
               <label>schemePath</label>
               <select
+                className="ui-select"
                 value={schemeBasename}
                 onChange={(e) =>
                   setConfig((c) => ({
@@ -394,7 +416,7 @@ export default function ConfigEditor() {
           <div className="field">
             <label>config.yaml</label>
             <textarea
-              className="mono"
+              className="ui-textarea mono"
               value={yamlText}
               onChange={(e) => setYamlText(e.target.value)}
               spellCheck={false}

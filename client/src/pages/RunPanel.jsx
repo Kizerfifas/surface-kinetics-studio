@@ -128,6 +128,7 @@ export default function RunPanel() {
             <label>Температура, K</label>
             <input
               type="number"
+              className="ui-input"
               value={temperature}
               onChange={(e) => setTemperature(Number(e.target.value))}
             />
@@ -137,7 +138,7 @@ export default function RunPanel() {
             <input
               value={simulationTime}
               onChange={(e) => setSimulationTime(e.target.value)}
-              className="mono"
+              className="ui-input mono"
             />
           </div>
           <div className="btn-row">

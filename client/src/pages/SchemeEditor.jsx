@@ -68,6 +68,7 @@ function SchemeForm({ scheme, onChange }) {
           <div key={i} className="expr-row-block">
             <div className="scheme-row expr-row-head">
               <input
+                className="ui-input mono"
                 value={r.id}
                 onChange={(e) => updateRates(i, 'id', e.target.value)}
                 placeholder="id"
@@ -97,6 +98,7 @@ function SchemeForm({ scheme, onChange }) {
           <div key={i} className="expr-row-block">
             <div className="scheme-row expr-row-head">
               <input
+                className="ui-input mono"
                 value={p.id}
                 onChange={(e) => updateProbs(i, 'id', e.target.value)}
                 style={{ width: '6rem' }}
@@ -129,6 +131,7 @@ function SchemeForm({ scheme, onChange }) {
           <div key={i} className="event-block">
             <div className="scheme-row">
               <select
+                className="ui-select"
                 value={e.event_type}
                 onChange={(ev) => updateEvents(i, 'event_type', ev.target.value)}
               >
@@ -138,7 +141,11 @@ function SchemeForm({ scheme, onChange }) {
                   </option>
                 ))}
               </select>
-              <select value={e.rate_id} onChange={(ev) => updateEvents(i, 'rate_id', ev.target.value)}>
+              <select
+                className="ui-select"
+                value={e.rate_id}
+                onChange={(ev) => updateEvents(i, 'rate_id', ev.target.value)}
+              >
                 {rateIds.map((id) => (
                   <option key={id} value={id}>
                     {id}
@@ -266,6 +273,7 @@ export default function SchemeEditor() {
         <div className="field" style={{ maxWidth: 320 }}>
           <label>Файл схемы</label>
           <select
+            className="ui-select"
             value={filename}
             onChange={(e) => {
               setFilename(e.target.value);
@@ -314,7 +322,7 @@ export default function SchemeEditor() {
           <div className="field">
             <label>scheme_marinov.yaml</label>
             <textarea
-              className="mono"
+              className="ui-textarea mono"
               value={yamlText}
               onChange={(e) => setYamlText(e.target.value)}
               spellCheck={false}
