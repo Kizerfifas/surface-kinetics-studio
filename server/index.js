@@ -13,6 +13,11 @@ import {
   schemeToYaml,
   yamlToScheme,
   EVENT_TYPES,
+  BUILTIN_FORMULA_PRESETS,
+  expandFormula,
+  listPresetsForUI,
+  mergeRegistries,
+  validateSchemeExpressions,
 } from './schemes.js';
 import {
   listResultRuns,
@@ -81,11 +86,31 @@ app.post('/api/schemes/validate', (req, res) => {
   try {
     const { yaml: rawYaml, scheme } = req.body;
     if (rawYaml != null) yamlToScheme(rawYaml);
-    else if (scheme) schemeToYaml(scheme);
+    else if (scheme) validateSchemeExpressions(scheme);
     else throw new Error('Provide yaml or scheme');
     res.json({ valid: true });
   } catch (e) {
     res.status(400).json({ valid: false, error: e.message });
+  }
+});
+
+app.get('/api/schemes/formula-presets', (req, res) => {
+  const context = req.query.context || '';
+  res.json({
+    builtins: BUILTIN_FORMULA_PRESETS,
+    presets: listPresetsForUI({}, context || undefined),
+  });
+});
+
+app.post('/api/schemes/expand-expr', (req, res) => {
+  try {
+    const { expr, functions } = req.body || {};
+    if (!expr) return res.status(400).json({ error: 'expr required' });
+    const reg = mergeRegistries(functions || {});
+    const expanded = expandFormula(expr, reg);
+    res.json({ expr, expanded, unchanged: expanded === expr });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
   }
 });
 

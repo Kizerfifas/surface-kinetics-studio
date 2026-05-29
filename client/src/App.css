@@ -668,6 +668,18 @@ table.data th {
   background: #fff;
 }
 
+.expr-chip-preset {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  color: var(--accent);
+}
+
+.expr-expanded {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.35rem 0 0;
+  word-break: break-all;
+}
+
 .db-preview {
   max-height: 200px;
   overflow: auto;

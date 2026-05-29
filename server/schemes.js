@@ -2,6 +2,15 @@ import fs from 'fs/promises';
 import path from 'path';
 import yaml from 'js-yaml';
 import { SCHEMES_DIR, DEFAULT_SCHEME_FILE } from './config.js';
+import {
+  BUILTIN_FORMULA_PRESETS,
+  expandFormula,
+  listPresetsForUI,
+  mergeRegistries,
+  validateSchemeExpressions,
+} from './formulaPresets.js';
+
+export { BUILTIN_FORMULA_PRESETS, expandFormula, listPresetsForUI, validateSchemeExpressions };
 
 const EVENT_TYPES = [
   'adsorption_F',
@@ -40,6 +49,7 @@ export function yamlToScheme(text) {
   if (!parsed || typeof parsed !== 'object') {
     throw new Error('Invalid scheme YAML');
   }
+  validateSchemeExpressions(parsed);
   return parsed;
 }
 

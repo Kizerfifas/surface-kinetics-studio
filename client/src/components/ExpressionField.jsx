@@ -8,7 +8,9 @@ import {
   CONSTANTS,
   OPERATORS,
   SNIPPETS,
+  FORMULA_PRESETS,
 } from '../lib/expressionCatalog';
+import { api } from '../api';
 
 /**
  * Formula input with autocomplete, variable chips, operators, and snippets.
@@ -19,7 +21,9 @@ export default function ExpressionField({
   onChange,
   context,
   rateIds = [],
-  placeholder = 'expr',
+  extraPresets = [],
+  schemeFunctions = null,
+  placeholder = 'пресет или формула вручную',
   rows = 2,
 }) {
   const textareaRef = useRef(null);
@@ -28,7 +32,17 @@ export default function ExpressionField({
   const [acIndex, setAcIndex] = useState(0);
   const [prefix, setPrefix] = useState('');
 
-  const allItems = useMemo(() => getCompletionItems(context, rateIds), [context, rateIds]);
+  const [expandedPreview, setExpandedPreview] = useState(null);
+
+  const presets = useMemo(() => {
+    const builtins = FORMULA_PRESETS[context] || [];
+    return [...builtins, ...extraPresets];
+  }, [context, extraPresets]);
+
+  const allItems = useMemo(
+    () => getCompletionItems(context, rateIds, extraPresets),
+    [context, rateIds, extraPresets],
+  );
 
   const filtered = useMemo(() => {
     if (!prefix) return allItems.slice(0, 24);
@@ -131,6 +145,18 @@ export default function ExpressionField({
 
   const snippets = SNIPPETS[context] || [];
 
+  const showExpandPreview = useCallback(() => {
+    const trimmed = (value || '').trim();
+    if (!trimmed) {
+      setExpandedPreview(null);
+      return;
+    }
+    api
+      .expandExpr(trimmed, schemeFunctions || undefined)
+      .then((r) => setExpandedPreview(r.unchanged ? null : r.expanded))
+      .catch(() => setExpandedPreview(null));
+  }, [value, schemeFunctions]);
+
   return (
     <div className="expr-field" ref={wrapRef}>
       <div className="expr-toolbar">
@@ -186,9 +212,26 @@ export default function ExpressionField({
         ))}
       </div>
 
+      {presets.length > 0 && (
+        <div className="expr-toolbar expr-toolbar-snippets">
+          <span className="expr-toolbar-label">Пресеты:</span>
+          {presets.map((p) => (
+            <button
+              key={p.name}
+              type="button"
+              className="expr-chip expr-chip-preset"
+              title={p.desc}
+              onClick={() => commitEdit(p.insert, 0, false)}
+            >
+              {p.name}()
+            </button>
+          ))}
+        </div>
+      )}
+
       {snippets.length > 0 && (
         <div className="expr-toolbar expr-toolbar-snippets">
-          <span className="expr-toolbar-label">Шаблоны:</span>
+          <span className="expr-toolbar-label">Вручную:</span>
           {snippets.map((s) => (
             <button
               key={s.label}
@@ -241,6 +284,7 @@ export default function ExpressionField({
           onKeyDown={handleKeyDown}
           onFocus={updateAutocomplete}
           onClick={updateAutocomplete}
+          onBlur={showExpandPreview}
           placeholder={placeholder}
           rows={rows}
           spellCheck={false}
@@ -270,9 +314,13 @@ export default function ExpressionField({
           </ul>
         )}
       </div>
+      {expandedPreview && (
+        <p className="expr-expanded mono" title="После раскрытия пресетов (движок)">
+          → {expandedPreview}
+        </p>
+      )}
       <p className="expr-hint">
-        Операторы: + − × ÷ ^ · функции: exp ln sqrt pow min max abs · переменная R=8.31 ·
-        Ctrl+Space — автодополнение
+        Пресеты (arrhenius, per, …) или полная формула вручную · R=8.31 · Ctrl+Space
       </p>
     </div>
   );

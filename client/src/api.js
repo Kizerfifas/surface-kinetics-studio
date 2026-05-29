@@ -21,6 +21,13 @@ export const api = {
     }),
   validateScheme: (body) =>
     request('/schemes/validate', { method: 'POST', body: JSON.stringify(body) }),
+  expandExpr: (expr, functions) =>
+    request('/schemes/expand-expr', {
+      method: 'POST',
+      body: JSON.stringify({ expr, functions }),
+    }),
+  listFormulaPresets: (context) =>
+    request(`/schemes/formula-presets${context ? `?context=${context}` : ''}`),
   emptyTemplate: () => request('/schemes/template/empty'),
   serializeScheme: (scheme) =>
     request('/schemes/serialize', { method: 'POST', body: JSON.stringify({ scheme }) }),

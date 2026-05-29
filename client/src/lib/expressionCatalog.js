@@ -66,7 +66,28 @@ export const OPERATORS = [
   { label: ')', insert: ')' },
 ];
 
-/** Snippets from Kim–Boudart / Marinov / report Table 2 */
+/**
+ * Named formula presets (expanded by engine before eval).
+ * Manual expr still allowed — presets are optional shortcuts.
+ */
+export const FORMULA_PRESETS = {
+  rate: [
+    { name: 'arrhenius', insert: 'arrhenius(Vdes, Edes)', desc: 'ν·exp(−E/(R·T))' },
+    { name: 'adsorption_flux', insert: 'adsorption_flux()', desc: 'Φ/(F_density+S_density)' },
+    { name: 'per', insert: 'per(Er)', desc: 'exp(−Er/(R·T))' },
+    { name: 'er_with_r3', insert: 'er_with_r3(Er)', desc: 'per(Er)·r3' },
+  ],
+  probability: [
+    { name: 'per', insert: 'per(Er)', desc: 'PER E-R' },
+    { name: 'plh', insert: 'plh(Erlh)', desc: 'PLH L–H' },
+  ],
+  lambda: [
+    { name: 'bkl_sites_rate', insert: 'bkl_sites_rate(free_F_sites, r1)', desc: 'сайты × r' },
+    { name: 'bkl_atoms_rate', insert: 'bkl_atoms_rate(atoms_on_F, r2)', desc: 'атомы × r' },
+  ],
+};
+
+/** Snippets — full manual formulas (not macros) */
 export const SNIPPETS = {
   rate: [
     { label: 'r1 ads F', insert: 'atomFlux / (F_density + S_density)' },
@@ -92,7 +113,7 @@ export const SNIPPETS = {
   ],
 };
 
-export function getCompletionItems(context, rateIds = []) {
+export function getCompletionItems(context, rateIds = [], extraPresets = []) {
   const vars =
     context === 'lambda'
       ? LAMBDA_VARIABLES.map((v) => ({ ...v }))
@@ -123,7 +144,29 @@ export function getCompletionItems(context, rateIds = []) {
     kind: 'variable',
   }));
 
-  return [...funcs, ...variables];
+  const builtins = (FORMULA_PRESETS[context] || []).map((p) => ({
+    ...p,
+    cursorOffset: 0,
+    kind: 'preset',
+  }));
+  const custom = extraPresets.map((p) => ({
+    name: p.name,
+    insert: p.insert,
+    cursorOffset: 0,
+    desc: p.desc,
+    kind: 'preset',
+  }));
+
+  return [...presetsUnique([...builtins, ...custom]), ...funcs, ...variables];
+}
+
+function presetsUnique(list) {
+  const seen = new Set();
+  return list.filter((p) => {
+    if (seen.has(p.name)) return false;
+    seen.add(p.name);
+    return true;
+  });
 }
 
 export function getWordBeforeCursor(text, cursor) {

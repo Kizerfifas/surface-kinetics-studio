@@ -12,6 +12,16 @@ const EVENT_TYPES = [
   'diffusion',
 ];
 
+function schemeFunctionsToPresets(functions) {
+  if (!functions || typeof functions !== 'object') return [];
+  return Object.entries(functions).map(([name, def]) => ({
+    name,
+    insert:
+      (def.params?.length ?? 0) > 0 ? `${name}(${def.params.join(', ')})` : `${name}()`,
+    desc: def.desc || def.expr || name,
+  }));
+}
+
 function SchemeForm({ scheme, onChange }) {
   const updateRates = (idx, field, value) => {
     const rates = [...(scheme.rates || [])];
@@ -60,9 +70,20 @@ function SchemeForm({ scheme, onChange }) {
   };
 
   const rateIds = (scheme.rates || []).map((r) => r.id).filter(Boolean);
+  const extraPresets = schemeFunctionsToPresets(scheme.functions);
+  const presetProps = { extraPresets, schemeFunctions: scheme.functions || null };
 
   return (
     <div className="scheme-form">
+      <section className="card">
+        <h3>Именованные пресеты</h3>
+        <p className="hint" style={{ marginTop: 0 }}>
+          В полях ниже можно вставить пресет (<code>arrhenius(Vdes, Edes)</code>,{' '}
+          <code>per(Er)</code>, …) или написать формулу целиком вручную. Свои пресеты — секция{' '}
+          <code>functions:</code> во вкладке YAML (как в LoKI PropertyFunctions).
+        </p>
+      </section>
+
       <section className="card">
         <h3>Скорости (rates)</h3>
         {(scheme.rates || []).map((r, i) => (
@@ -84,7 +105,8 @@ function SchemeForm({ scheme, onChange }) {
               onChange={(expr) => updateRates(i, 'expr', expr)}
               context="rate"
               rateIds={rateIds.slice(0, i)}
-              placeholder="например atomFlux / (F_density + S_density)"
+              placeholder="arrhenius(Vdes, Edes) или Vdes * exp(-Edes / (R * T))"
+              {...presetProps}
             />
           </div>
         ))}
@@ -113,7 +135,8 @@ function SchemeForm({ scheme, onChange }) {
               onChange={(expr) => updateProbs(i, 'expr', expr)}
               context="probability"
               rateIds={rateIds}
-              placeholder="например exp(-Er / (8.31 * T))"
+              placeholder="per(Er) или exp(-Er / (R * T))"
+              {...presetProps}
             />
           </div>
         ))}
@@ -166,8 +189,9 @@ function SchemeForm({ scheme, onChange }) {
               onChange={(expr) => updateEvents(i, 'lambda_expr', expr)}
               context="lambda"
               rateIds={rateIds}
-              placeholder="например free_F_sites * r1"
+              placeholder="bkl_sites_rate(free_F_sites, r1) или вручную"
               rows={1}
+              {...presetProps}
             />
           </div>
         ))}
