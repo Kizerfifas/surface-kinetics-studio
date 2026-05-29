@@ -57,6 +57,11 @@ app.get('/api/health', (_req, res) => {
 });
 
 // --- Schemes ---
+function isSchemeYamlFilename(name) {
+  const base = path.basename(String(name || ''));
+  return base.endsWith('.yaml') || base.endsWith('.yml');
+}
+
 app.get('/api/schemes', async (_req, res) => {
   try {
     const files = await listSchemeFiles();
@@ -66,7 +71,8 @@ app.get('/api/schemes', async (_req, res) => {
   }
 });
 
-app.post('/api/schemes/create', async (req, res) => {
+// Literal paths first (before /:filename) so "create" is not treated as a filename.
+app.post('/api/schemes/new-file', async (req, res) => {
   try {
     const { filename, template, source } = req.body || {};
     if (!filename) return res.status(400).json({ error: 'filename required' });
@@ -77,21 +83,11 @@ app.post('/api/schemes/create', async (req, res) => {
   }
 });
 
-app.get('/api/schemes/:filename', async (req, res) => {
+app.post('/api/schemes/create', async (req, res) => {
   try {
-    const data = await readScheme(req.params.filename);
-    res.json(data);
-  } catch (e) {
-    res.status(404).json({ error: e.message });
-  }
-});
-
-app.post('/api/schemes/:filename', async (req, res) => {
-  try {
-    const { scheme, yaml: rawYaml } = req.body;
-    const out = rawYaml != null
-      ? await writeScheme(req.params.filename, rawYaml, true)
-      : await writeScheme(req.params.filename, scheme ?? emptyScheme(), false);
+    const { filename, template, source } = req.body || {};
+    if (!filename) return res.status(400).json({ error: 'filename required' });
+    const out = await createScheme(filename, { template: template || 'empty', source });
     res.json(out);
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -150,6 +146,38 @@ app.post('/api/schemes/serialize', (req, res) => {
     const { scheme } = req.body;
     if (!scheme) return res.status(400).json({ error: 'scheme required' });
     res.json({ yaml: schemeToYaml(scheme) });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.get('/api/schemes/:filename', async (req, res) => {
+  try {
+    if (!isSchemeYamlFilename(req.params.filename)) {
+      return res.status(404).json({
+        error: 'Ожидается имя файла .yaml/.yml. Перезапустите API (npm run dev:server).',
+      });
+    }
+    const data = await readScheme(req.params.filename);
+    res.json(data);
+  } catch (e) {
+    res.status(404).json({ error: e.message });
+  }
+});
+
+app.post('/api/schemes/:filename', async (req, res) => {
+  try {
+    if (!isSchemeYamlFilename(req.params.filename)) {
+      return res.status(400).json({
+        error:
+          'Имя файла должно оканчиваться на .yaml или .yml. Если создаёте схему — перезапустите сервер Studio (npm run dev).',
+      });
+    }
+    const { scheme, yaml: rawYaml } = req.body;
+    const out = rawYaml != null
+      ? await writeScheme(req.params.filename, rawYaml, true)
+      : await writeScheme(req.params.filename, scheme ?? emptyScheme(), false);
+    res.json(out);
   } catch (e) {
     res.status(400).json({ error: e.message });
   }

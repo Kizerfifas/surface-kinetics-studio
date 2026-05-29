@@ -14,7 +14,7 @@ export const api = {
   health: () => request('/health'),
   listSchemes: () => request('/schemes'),
   createScheme: (filename, { template = 'empty', source } = {}) =>
-    request('/schemes/create', {
+    request('/schemes/new-file', {
       method: 'POST',
       body: JSON.stringify({ filename, template, source }),
     }),

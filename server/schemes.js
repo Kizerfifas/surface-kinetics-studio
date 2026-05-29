@@ -64,9 +64,10 @@ function sanitizeSchemeFilename(name) {
  * @param {'empty'|'marinov'|'copy'} template
  */
 export async function createScheme(filename, { template = 'empty', source } = {}) {
-  const safe = sanitizeSchemeFilename(
-    filename.endsWith('.yaml') || filename.endsWith('.yml') ? filename : `${filename}.yaml`,
-  );
+  const trimmed = String(filename || '').trim();
+  const withExt =
+    trimmed.endsWith('.yaml') || trimmed.endsWith('.yml') ? trimmed : `${trimmed}.yaml`;
+  const safe = sanitizeSchemeFilename(withExt);
   const full = path.join(SCHEMES_DIR, safe);
   try {
     await fs.access(full);
