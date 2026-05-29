@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api';
 import SelectWrap from '../components/SelectWrap';
 import DatabasePanel from '../components/DatabasePanel';
+import { useSyncedEditorTabs } from '../lib/useSyncedEditorTabs';
 
 const CHECK_PARAM_NAMES = ['densityF', 'densityS', 'density', 'atomsOnSurface'];
 
@@ -265,27 +266,43 @@ export default function ConfigEditor() {
     }
   };
 
-  const saveForm = async () => {
+  const syncFormToYaml = useCallback(async () => {
+    const { text } = await api.serializeConfig(config);
+    setYamlText(text);
+  }, [config]);
+
+  const syncYamlToForm = useCallback(async () => {
+    const { config: c, text } = await api.parseConfigYaml(yamlText);
+    setConfig(c);
+    setYamlText(text);
+  }, [yamlText]);
+
+  const switchTab = useSyncedEditorTabs({
+    tab,
+    setTab,
+    setError,
+    syncFormToYaml,
+    syncYamlToForm,
+  });
+
+  const save = async () => {
     setError(null);
     setMessage(null);
     try {
-      const { config: c, text } = await api.saveConfig(config);
+      let configToSave = config;
+      if (tab === 'yaml') {
+        const parsed = await api.parseConfigYaml(yamlText);
+        configToSave = parsed.config;
+        setConfig(parsed.config);
+        setYamlText(parsed.text);
+      } else {
+        const { text } = await api.serializeConfig(config);
+        setYamlText(text);
+      }
+      const { config: c, text } = await api.saveConfig(configToSave);
       setConfig(c);
       setYamlText(text);
       setMessage('config.yaml сохранён');
-    } catch (e) {
-      setError(e.message);
-    }
-  };
-
-  const saveYaml = async () => {
-    setError(null);
-    setMessage(null);
-    try {
-      const { config: c, text } = await api.saveConfigYaml(yamlText);
-      setConfig(c);
-      setYamlText(text);
-      setMessage('config.yaml сохранён из YAML');
     } catch (e) {
       setError(e.message);
     }
@@ -332,15 +349,16 @@ export default function ConfigEditor() {
       />
 
       <div className="tabs">
-        <button type="button" className={tab === 'form' ? 'active' : ''} onClick={() => setTab('form')}>
+        <button type="button" className={tab === 'form' ? 'active' : ''} onClick={() => switchTab('form')}>
           Форма
         </button>
-        <button type="button" className={tab === 'yaml' ? 'active' : ''} onClick={() => setTab('yaml')}>
+        <button type="button" className={tab === 'yaml' ? 'active' : ''} onClick={() => switchTab('yaml')}>
           YAML
         </button>
-        <button type="button" className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={saveForm}>
+        <button type="button" className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={save}>
           Сохранить
         </button>
+        <span className="tabs-sync-hint">Синхронизация при смене вкладки</span>
       </div>
 
       {tab === 'form' ? (
@@ -439,9 +457,6 @@ export default function ConfigEditor() {
               spellCheck={false}
             />
           </div>
-          <button type="button" className="btn btn-primary" onClick={saveYaml}>
-            Сохранить YAML
-          </button>
         </div>
       )}
     </>

@@ -30,6 +30,10 @@ import {
   readSimConfig,
   writeSimConfig,
   writeSimConfigYaml,
+  parseConfigYaml,
+  configToYamlText,
+  normalizeConfig,
+  validateConfig,
   presetSingleComponent,
   presetTwoComponent,
   CHECK_PARAM_NAMES,
@@ -114,6 +118,17 @@ app.get('/api/schemes/formula-presets', (req, res) => {
   });
 });
 
+app.post('/api/schemes/parse', (req, res) => {
+  try {
+    const { yaml: raw } = req.body || {};
+    if (raw == null) return res.status(400).json({ error: 'yaml required' });
+    const scheme = yamlToScheme(raw);
+    res.json({ scheme, text: schemeToYaml(scheme) });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 app.post('/api/schemes/expand-expr', (req, res) => {
   try {
     const { expr, functions } = req.body || {};
@@ -171,6 +186,28 @@ app.post('/api/config/yaml', async (req, res) => {
     if (raw == null) return res.status(400).json({ error: 'yaml required' });
     const out = await writeSimConfigYaml(raw);
     res.json(out);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/config/parse-yaml', (req, res) => {
+  try {
+    const { yaml: raw } = req.body || {};
+    if (raw == null) return res.status(400).json({ error: 'yaml required' });
+    res.json(parseConfigYaml(raw));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/config/serialize', (req, res) => {
+  try {
+    const { config } = req.body || {};
+    if (!config) return res.status(400).json({ error: 'config required' });
+    const normalized = normalizeConfig(config);
+    validateConfig(normalized);
+    res.json({ config: normalized, text: configToYamlText(normalized) });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }

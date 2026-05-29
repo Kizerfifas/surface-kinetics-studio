@@ -36,6 +36,12 @@ export const api = {
   emptyTemplate: () => request('/schemes/template/empty'),
   serializeScheme: (scheme) =>
     request('/schemes/serialize', { method: 'POST', body: JSON.stringify({ scheme }) }),
+  parseSchemeYaml: (yaml) =>
+    request('/schemes/parse', { method: 'POST', body: JSON.stringify({ yaml }) }),
+  serializeConfig: (config) =>
+    request('/config/serialize', { method: 'POST', body: JSON.stringify({ config }) }),
+  parseConfigYaml: (yaml) =>
+    request('/config/parse-yaml', { method: 'POST', body: JSON.stringify({ yaml }) }),
   setSchemePath: (filename) =>
     request('/config/scheme-path', { method: 'POST', body: JSON.stringify({ filename }) }),
   getConfig: () => request('/config'),

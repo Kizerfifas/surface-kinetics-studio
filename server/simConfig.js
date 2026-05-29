@@ -206,12 +206,17 @@ export async function writeSimConfig(cfg) {
   return { config: normalized, text };
 }
 
-export async function writeSimConfigYaml(rawText) {
+export function parseConfigYaml(rawText) {
   const parsed = yaml.load(rawText);
   if (!parsed || typeof parsed !== 'object') throw new Error('Некорректный YAML');
   const config = normalizeConfig(parsed);
   validateConfig(config);
   const text = configToYamlText(config);
+  return { config, text };
+}
+
+export async function writeSimConfigYaml(rawText) {
+  const { config, text } = parseConfigYaml(rawText);
   await fs.writeFile(CONFIG_PATH, text, 'utf8');
   return { config, text };
 }

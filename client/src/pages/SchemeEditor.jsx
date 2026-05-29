@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSyncedEditorTabs } from '../lib/useSyncedEditorTabs';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import ExpressionField from '../components/ExpressionField';
@@ -241,28 +242,44 @@ export default function SchemeEditor() {
     loadScheme('scheme_marinov.yaml');
   }, [loadList, loadScheme]);
 
-  const saveFromForm = async () => {
-    setError(null);
-    setMessage(null);
-    try {
-      await api.validateScheme({ scheme });
-      const { text } = await api.saveScheme(filename, { scheme });
-      setYamlText(text);
-      setMessage(`Схема сохранена: configs/${filename}`);
-    } catch (e) {
-      setError(e.message);
-    }
-  };
+  const syncFormToYaml = useCallback(async () => {
+    const { yaml } = await api.serializeScheme(scheme);
+    setYamlText(yaml);
+  }, [scheme]);
 
-  const saveFromYaml = async () => {
+  const syncYamlToForm = useCallback(async () => {
+    const { scheme: s, text } = await api.parseSchemeYaml(yamlText);
+    setScheme(s);
+    setYamlText(text);
+  }, [yamlText]);
+
+  const switchTab = useSyncedEditorTabs({
+    tab,
+    setTab,
+    setError,
+    syncFormToYaml,
+    syncYamlToForm,
+  });
+
+  const save = async () => {
     setError(null);
     setMessage(null);
     try {
-      await api.validateScheme({ yaml: yamlText });
-      const { text, scheme: s } = await api.saveScheme(filename, { yaml: yamlText });
+      let schemeToSave = scheme;
+      if (tab === 'yaml') {
+        const parsed = await api.parseSchemeYaml(yamlText);
+        schemeToSave = parsed.scheme;
+        setScheme(parsed.scheme);
+        setYamlText(parsed.text);
+      } else {
+        const { yaml } = await api.serializeScheme(scheme);
+        setYamlText(yaml);
+      }
+      await api.validateScheme({ scheme: schemeToSave });
+      const { text, scheme: saved } = await api.saveScheme(filename, { scheme: schemeToSave });
       setYamlText(text);
-      if (s) setScheme(s);
-      setMessage(`YAML сохранён: configs/${filename}`);
+      if (saved) setScheme(saved);
+      setMessage(`Сохранено: configs/${filename}`);
     } catch (e) {
       setError(e.message);
     }
@@ -273,16 +290,6 @@ export default function SchemeEditor() {
     try {
       const { schemePath } = await api.setSchemePath(filename);
       setMessage(`В config.yaml установлено: ${schemePath}`);
-    } catch (e) {
-      setError(e.message);
-    }
-  };
-
-  const showYamlFromForm = async () => {
-    try {
-      const { yaml } = await api.serializeScheme(scheme);
-      setYamlText(yaml);
-      setTab('yaml');
     } catch (e) {
       setError(e.message);
     }
@@ -389,11 +396,8 @@ export default function SchemeEditor() {
         )}
 
         <div className="scheme-file-actions">
-          <button type="button" className="btn btn-primary" onClick={saveFromForm}>
-            Сохранить (форма)
-          </button>
-          <button type="button" className="btn btn-primary" onClick={saveFromYaml}>
-            Сохранить (YAML)
+          <button type="button" className="btn btn-primary" onClick={save}>
+            Сохранить
           </button>
           <button type="button" className="btn" onClick={activateInConfig}>
             Подключить в config.yaml
@@ -402,17 +406,13 @@ export default function SchemeEditor() {
       </div>
 
       <div className="tabs">
-        <button type="button" className={tab === 'form' ? 'active' : ''} onClick={() => setTab('form')}>
+        <button type="button" className={tab === 'form' ? 'active' : ''} onClick={() => switchTab('form')}>
           Форма
         </button>
-        <button type="button" className={tab === 'yaml' ? 'active' : ''} onClick={() => setTab('yaml')}>
+        <button type="button" className={tab === 'yaml' ? 'active' : ''} onClick={() => switchTab('yaml')}>
           YAML
         </button>
-        {tab === 'form' && (
-          <button type="button" className="btn" onClick={showYamlFromForm} style={{ marginLeft: 'auto' }}>
-            Показать YAML из формы
-          </button>
-        )}
+        <span className="tabs-sync-hint">При переключении вкладок данные синхронизируются</span>
       </div>
 
       {tab === 'form' ? (
