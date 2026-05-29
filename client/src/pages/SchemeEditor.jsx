@@ -212,6 +212,9 @@ export default function SchemeEditor() {
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
+  const [newName, setNewName] = useState('scheme_new.yaml');
+  const [newTemplate, setNewTemplate] = useState('empty');
 
   const loadList = useCallback(async () => {
     const { files: f } = await api.listSchemes();
@@ -285,6 +288,27 @@ export default function SchemeEditor() {
     }
   };
 
+  const handleCreateScheme = async () => {
+    setError(null);
+    setMessage(null);
+    try {
+      const opts =
+        newTemplate === 'copy'
+          ? { template: 'copy', source: filename }
+          : { template: newTemplate };
+      const { filename: created, text, scheme: s } = await api.createScheme(newName, opts);
+      await loadList();
+      setFilename(created);
+      setScheme(s);
+      setYamlText(text);
+      setNewOpen(false);
+      setTab('form');
+      setMessage(`Создан файл configs/${created}`);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
   return (
     <>
       <h1 className="page-title">Редактор схемы</h1>
@@ -299,26 +323,72 @@ export default function SchemeEditor() {
       {message && <div className="alert alert-success">{message}</div>}
 
       <div className="card">
-        <div className="field" style={{ maxWidth: 320 }}>
-          <label>Файл схемы</label>
-          <SelectWrap>
-            <select
-              className="ui-select"
-              value={filename}
-              onChange={(e) => {
-                setFilename(e.target.value);
-                loadScheme(e.target.value);
-              }}
-              disabled={loading}
-            >
-              {files.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </SelectWrap>
+        <div className="scheme-file-row">
+          <div className="field" style={{ flex: 1, maxWidth: 360 }}>
+            <label>Файл схемы</label>
+            <SelectWrap>
+              <select
+                className="ui-select"
+                value={filename}
+                onChange={(e) => {
+                  setFilename(e.target.value);
+                  loadScheme(e.target.value);
+                }}
+                disabled={loading}
+              >
+                {files.length === 0 && <option value={filename}>{filename}</option>}
+                {files.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </SelectWrap>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            style={{ alignSelf: 'flex-end' }}
+            onClick={() => setNewOpen((v) => !v)}
+          >
+            {newOpen ? 'Отмена' : '+ Новая схема'}
+          </button>
         </div>
+
+        {newOpen && (
+          <div className="new-scheme-panel">
+            <div className="grid-2">
+              <div className="field">
+                <label>Имя файла</label>
+                <input
+                  className="ui-input mono"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="scheme_my.yaml"
+                />
+                <p className="hint">Сохранится в surface-atoms/configs/</p>
+              </div>
+              <div className="field">
+                <label>Шаблон</label>
+                <SelectWrap>
+                  <select
+                    className="ui-select"
+                    value={newTemplate}
+                    onChange={(e) => setNewTemplate(e.target.value)}
+                  >
+                    <option value="empty">Пустой (r1–r5, пресеты Marinov)</option>
+                    <option value="marinov">Копия scheme_marinov.yaml</option>
+                    <option value="copy">Копия текущего файла ({filename})</option>
+                  </select>
+                </SelectWrap>
+              </div>
+            </div>
+            <button type="button" className="btn btn-primary" onClick={handleCreateScheme}>
+              Создать и открыть
+            </button>
+          </div>
+        )}
+
         <div className="btn-row">
           <button type="button" className="btn btn-primary" onClick={saveFromForm}>
             Сохранить (форма)
@@ -351,7 +421,7 @@ export default function SchemeEditor() {
       ) : (
         <div className="card">
           <div className="field">
-            <label>scheme_marinov.yaml</label>
+            <label>{filename}</label>
             <textarea
               className="ui-textarea mono"
               value={yamlText}

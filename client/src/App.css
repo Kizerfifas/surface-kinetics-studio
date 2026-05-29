@@ -680,6 +680,22 @@ table.data th {
   word-break: break-all;
 }
 
+.scheme-file-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.new-scheme-panel {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: var(--bg-input);
+}
+
 .db-preview {
   max-height: 200px;
   overflow: auto;

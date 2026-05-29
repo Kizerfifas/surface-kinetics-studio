@@ -9,6 +9,7 @@ import {
   listSchemeFiles,
   readScheme,
   writeScheme,
+  createScheme,
   emptyScheme,
   schemeToYaml,
   yamlToScheme,
@@ -58,6 +59,17 @@ app.get('/api/schemes', async (_req, res) => {
     res.json({ files, defaultFile: DEFAULT_SCHEME_FILE, eventTypes: EVENT_TYPES });
   } catch (e) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/schemes/create', async (req, res) => {
+  try {
+    const { filename, template, source } = req.body || {};
+    if (!filename) return res.status(400).json({ error: 'filename required' });
+    const out = await createScheme(filename, { template: template || 'empty', source });
+    res.json(out);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
   }
 });
 

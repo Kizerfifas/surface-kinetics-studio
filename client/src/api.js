@@ -13,6 +13,11 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request('/health'),
   listSchemes: () => request('/schemes'),
+  createScheme: (filename, { template = 'empty', source } = {}) =>
+    request('/schemes/create', {
+      method: 'POST',
+      body: JSON.stringify({ filename, template, source }),
+    }),
   getScheme: (filename) => request(`/schemes/${encodeURIComponent(filename)}`),
   saveScheme: (filename, body) =>
     request(`/schemes/${encodeURIComponent(filename)}`, {
