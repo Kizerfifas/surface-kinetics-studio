@@ -1,5 +1,7 @@
 # Surface Kinetics Studio
 
+**Развёртывание экосистемы (surface-atoms + Studio):** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) → [полная инструкция в surface-atoms](https://github.com/Kizerfifas/surface-atoms/blob/dev/docs/DEPLOYMENT.md)
+
 Веб-интерфейс для проекта [surface-atoms](../surface-atoms):
 
 - редактирование кинетических схем (YAML);
