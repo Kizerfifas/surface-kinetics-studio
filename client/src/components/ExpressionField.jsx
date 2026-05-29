@@ -3,7 +3,9 @@ import {
   applyTextEdit,
   getCompletionItems,
   getWordBeforeCursor,
-  FUNCTIONS,
+  FUNCTIONS_PRIMARY,
+  FUNCTIONS_EXTRA,
+  CONSTANTS,
   OPERATORS,
   SNIPPETS,
 } from '../lib/expressionCatalog';
@@ -132,8 +134,9 @@ export default function ExpressionField({
   return (
     <div className="expr-field" ref={wrapRef}>
       <div className="expr-toolbar">
+        <span className="expr-toolbar-label">Функции</span>
         <span className="expr-toolbar-group">
-          {FUNCTIONS.map((f) => (
+          {FUNCTIONS_PRIMARY.map((f) => (
             <button
               key={f.name}
               type="button"
@@ -145,18 +148,42 @@ export default function ExpressionField({
             </button>
           ))}
         </span>
-        <span className="expr-toolbar-group">
-          {OPERATORS.map((op) => (
-            <button
-              key={op.label}
-              type="button"
-              className="expr-chip expr-chip-op"
-              onClick={() => commitEdit(op.insert, 0, false)}
-            >
-              {op.label}
-            </button>
-          ))}
-        </span>
+      </div>
+      <div className="expr-toolbar expr-toolbar-compact">
+        {FUNCTIONS_EXTRA.map((f) => (
+          <button
+            key={f.name}
+            type="button"
+            className="expr-chip expr-chip-fn"
+            title={f.desc}
+            onClick={() => commitEdit(f.insert, f.cursorOffset, false)}
+          >
+            {f.name}()
+          </button>
+        ))}
+        {CONSTANTS.map((c) => (
+          <button
+            key={c.name}
+            type="button"
+            className="expr-chip expr-chip-const"
+            title={c.desc}
+            onClick={() => commitEdit(c.insert, c.cursorOffset, false)}
+          >
+            {c.name}
+          </button>
+        ))}
+        <span className="expr-toolbar-sep" />
+        {OPERATORS.map((op) => (
+          <button
+            key={op.label}
+            type="button"
+            className="expr-chip expr-chip-op"
+            title={op.desc || op.label}
+            onClick={() => commitEdit(op.insert, 0, false)}
+          >
+            {op.label}
+          </button>
+        ))}
       </div>
 
       {snippets.length > 0 && (
@@ -243,7 +270,10 @@ export default function ExpressionField({
           </ul>
         )}
       </div>
-      <p className="expr-hint">Ctrl+Space — список · Tab/Enter — вставить · ↑↓ — выбор</p>
+      <p className="expr-hint">
+        Операторы: + − × ÷ ^ · функции: exp ln sqrt pow min max abs · переменная R=8.31 ·
+        Ctrl+Space — автодополнение
+      </p>
     </div>
   );
 }

@@ -526,6 +526,21 @@ table.data th {
   font-size: 0.7rem;
 }
 
+.expr-chip-const {
+  color: var(--warn);
+}
+
+.expr-toolbar-compact {
+  margin-bottom: 0.35rem;
+}
+
+.expr-toolbar-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--border);
+  margin: 0 0.15rem;
+}
+
 .expr-chip-muted {
   color: var(--text-muted);
 }

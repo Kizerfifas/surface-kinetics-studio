@@ -1,16 +1,17 @@
-/** Shared with surface-atoms scheme.Eval / EvalLambdaExpr */
+/** Shared with surface-atoms scheme (govaluate). Operators: + - * / % ^ */
 
 export const RATE_VARIABLES = [
-  { name: 'F_density', desc: 'концентрация F-центров (config consts)' },
-  { name: 'S_density', desc: 'концентрация S-центров' },
-  { name: 'T', desc: 'температура, K' },
-  { name: 'atomFlux', desc: 'поток атомов на поверхность' },
-  { name: 'Edes', desc: 'энергия десорбции, элемента' },
-  { name: 'Edif', desc: 'энергия диффузии' },
-  { name: 'Vdes', desc: 'частотный фактор десорбции' },
-  { name: 'Vdif', desc: 'частотный фактор диффузии' },
-  { name: 'Er', desc: 'барьер E-R' },
-  { name: 'Erlh', desc: 'барьер L-H' },
+  { name: 'F_density', desc: 'плотность F-центров [см⁻²]' },
+  { name: 'S_density', desc: 'плотность S-центров' },
+  { name: 'T', desc: 'температура стенки Tw, K' },
+  { name: 'atomFlux', desc: 'поток атомов Φ на поверхность' },
+  { name: 'Edes', desc: 'Ed — энергия активации десорбции' },
+  { name: 'Edif', desc: 'энергия активации диффузии' },
+  { name: 'Vdes', desc: 'νd — частотный фактор десорбции' },
+  { name: 'Vdif', desc: 'νD — частотный фактор диффузии' },
+  { name: 'Er', desc: 'ER — барьер Eley–Rideal' },
+  { name: 'Erlh', desc: 'барьер Langmuir–Hinshelwood' },
+  { name: 'R', desc: 'газовая постоянная (8.31), как в Marinov: Er/(R·T)' },
 ];
 
 export const LAMBDA_VARIABLES = [
@@ -22,15 +23,37 @@ export const LAMBDA_VARIABLES = [
   { name: 'S_density', desc: 'концентрация S' },
   { name: 'atomFlux', desc: 'поток атомов' },
   { name: 'T', desc: 'температура, K' },
+  { name: 'R', desc: '8.31 — в формулах Arrhenius' },
   ...['r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7'].map((name) => ({
     name,
-    desc: 'скорость из rates',
+    desc: 'скорость ri из rates',
   })),
 ];
 
-export const FUNCTIONS = [
-  { name: 'exp', insert: 'exp()', cursorOffset: -1, desc: 'экспонента' },
-  { name: 'log', insert: 'log()', cursorOffset: -1, desc: 'натуральный логарифм' },
+/** Primary toolbar functions */
+export const FUNCTIONS_PRIMARY = [
+  { name: 'exp', insert: 'exp()', cursorOffset: -1, desc: 'e^x, Arrhenius' },
+  { name: 'ln', insert: 'ln()', cursorOffset: -1, desc: 'натуральный лог' },
+  { name: 'log', insert: 'log()', cursorOffset: -1, desc: 'натуральный лог' },
+  { name: 'sqrt', insert: 'sqrt()', cursorOffset: -1, desc: 'корень, напр. дифф. длина' },
+  { name: 'pow', insert: 'pow(, )', cursorOffset: -3, desc: 'pow(x, y)' },
+];
+
+/** More functions (overflow row) */
+export const FUNCTIONS_EXTRA = [
+  { name: 'abs', insert: 'abs()', cursorOffset: -1, desc: 'модуль' },
+  { name: 'min', insert: 'min(, )', cursorOffset: -3, desc: 'минимум из двух' },
+  { name: 'max', insert: 'max(, )', cursorOffset: -3, desc: 'максимум из двух' },
+  { name: 'log10', insert: 'log10()', cursorOffset: -1, desc: 'логарифм по основанию 10' },
+  { name: 'exp10', insert: 'exp10()', cursorOffset: -1, desc: '10^x' },
+  { name: 'pi', insert: 'pi()', cursorOffset: 0, desc: 'π' },
+];
+
+export const FUNCTIONS = [...FUNCTIONS_PRIMARY, ...FUNCTIONS_EXTRA];
+
+export const CONSTANTS = [
+  { name: 'R', insert: 'R', cursorOffset: 0, desc: '8.31 — газовая постоянная (Marinov)' },
+  { name: 'pi()', insert: 'pi()', cursorOffset: 0, desc: '3.14159…' },
 ];
 
 export const OPERATORS = [
@@ -38,20 +61,27 @@ export const OPERATORS = [
   { label: '−', insert: ' - ' },
   { label: '×', insert: ' * ' },
   { label: '÷', insert: ' / ' },
+  { label: '^', insert: ' ^ ', desc: 'степень (govaluate)' },
   { label: '(', insert: '(' },
   { label: ')', insert: ')' },
 ];
 
+/** Snippets from Kim–Boudart / Marinov / report Table 2 */
 export const SNIPPETS = {
   rate: [
-    { label: 'r ∝ flux / density', insert: 'atomFlux / (F_density + S_density)' },
-    { label: 'Desorption', insert: 'Vdes * exp(-Edes / (8.31 * T))' },
-    { label: 'E-R × r3', insert: 'exp(-Er / (8.31 * T)) * r3' },
-    { label: 'Diffusion rate', insert: 'Vdif * exp(-Edif / (8.31 * T))' },
+    { label: 'r1 ads F', insert: 'atomFlux / (F_density + S_density)' },
+    { label: 'r3 ads S', insert: 'atomFlux / (F_density + S_density)' },
+    { label: 'Desorption r2', insert: 'Vdes * exp(-Edes / (R * T))' },
+    { label: 'Diffusion r5', insert: 'Vdif * exp(-Edif / (R * T))' },
+    { label: 'E-R r4', insert: 'exp(-Er / (R * T)) * r3' },
+    { label: 'τd⁻¹', insert: 'Vdif * exp(-Edif / (R * T))' },
+    { label: 'Arrhenius', insert: 'exp(-Edes / (8.31 * T))' },
   ],
   probability: [
-    { label: 'E-R on S', insert: 'exp(-Er / (8.31 * T))' },
-    { label: 'L-H on F', insert: 'exp(-Erlh / (8.31 * T))' },
+    { label: 'PER (E-R)', insert: 'exp(-Er / (R * T))' },
+    { label: 'PLH (L-H)', insert: 'exp(-Erlh / (R * T))' },
+    { label: 'γ E-R', insert: '2 * exp(-Er / (R * T))' },
+    { label: 'kR·exp', insert: 'exp(-Er / (8.31 * T))' },
   ],
   lambda: [
     { label: 'Ads F', insert: 'free_F_sites * r1' },
@@ -62,10 +92,6 @@ export const SNIPPETS = {
   ],
 };
 
-/**
- * @param {'rate'|'probability'|'lambda'} context
- * @param {string[]} rateIds - ids from scheme.rates (r1, r2, …)
- */
 export function getCompletionItems(context, rateIds = []) {
   const vars =
     context === 'lambda'
@@ -107,8 +133,7 @@ export function getWordBeforeCursor(text, cursor) {
 }
 
 export function applyTextEdit(value, selectionStart, selectionEnd, insert, cursorOffset = 0) {
-  const next =
-    value.slice(0, selectionStart) + insert + value.slice(selectionEnd);
+  const next = value.slice(0, selectionStart) + insert + value.slice(selectionEnd);
   const pos = selectionStart + insert.length + cursorOffset;
   return { value: next, selectionStart: pos, selectionEnd: pos };
 }
