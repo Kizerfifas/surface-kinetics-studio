@@ -10,7 +10,13 @@ import {
   validateSchemeExpressions,
 } from './formulaPresets.js';
 
-export { BUILTIN_FORMULA_PRESETS, expandFormula, listPresetsForUI, validateSchemeExpressions };
+export {
+  BUILTIN_FORMULA_PRESETS,
+  expandFormula,
+  listPresetsForUI,
+  mergeRegistries,
+  validateSchemeExpressions,
+};
 
 const EVENT_TYPES = [
   'adsorption_F',
