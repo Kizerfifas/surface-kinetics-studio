@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api';
+import SelectWrap from '../components/SelectWrap';
 
 const CHECK_PARAM_NAMES = ['densityF', 'densityS', 'density', 'atomsOnSurface'];
 
@@ -170,17 +171,19 @@ function QuasiSteadySection({ simulating, onSimulatingChange }) {
           <div className="param-card-fields">
             <label className="param-field">
               <span>Параметр</span>
-              <select
-                className="ui-select"
-                value={p.name}
-                onChange={(e) => updateParam(i, 'name', e.target.value)}
-              >
-                {CHECK_PARAM_NAMES.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
+              <SelectWrap>
+                <select
+                  className="ui-select"
+                  value={p.name}
+                  onChange={(e) => updateParam(i, 'name', e.target.value)}
+                >
+                  {CHECK_PARAM_NAMES.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </SelectWrap>
             </label>
             <label className="param-field">
               <span>tolerance, %</span>
@@ -334,23 +337,25 @@ export default function ConfigEditor() {
             <h3>Кинетическая схема</h3>
             <div className="field" style={{ maxWidth: 360 }}>
               <label>schemePath</label>
-              <select
-                className="ui-select"
-                value={schemeBasename}
-                onChange={(e) =>
-                  setConfig((c) => ({
-                    ...c,
-                    schemePath: e.target.value ? `configs/${e.target.value}` : '',
-                  }))
-                }
-              >
-                <option value="">— без схемы (legacy Fill) —</option>
-                {schemeFiles.map((f) => (
-                  <option key={f} value={f}>
-                    configs/{f}
-                  </option>
-                ))}
-              </select>
+              <SelectWrap>
+                <select
+                  className="ui-select"
+                  value={schemeBasename}
+                  onChange={(e) =>
+                    setConfig((c) => ({
+                      ...c,
+                      schemePath: e.target.value ? `configs/${e.target.value}` : '',
+                    }))
+                  }
+                >
+                  <option value="">— без схемы (legacy Fill) —</option>
+                  {schemeFiles.map((f) => (
+                    <option key={f} value={f}>
+                      configs/{f}
+                    </option>
+                  ))}
+                </select>
+              </SelectWrap>
             </div>
           </section>
 

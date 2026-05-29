@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
 import ExpressionField from '../components/ExpressionField';
+import SelectWrap from '../components/SelectWrap';
 
 const EVENT_TYPES = [
   'adsorption_F',
@@ -130,28 +131,32 @@ function SchemeForm({ scheme, onChange }) {
         {(scheme.events || []).map((e, i) => (
           <div key={i} className="event-block">
             <div className="scheme-row">
-              <select
-                className="ui-select"
-                value={e.event_type}
-                onChange={(ev) => updateEvents(i, 'event_type', ev.target.value)}
-              >
-                {EVENT_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="ui-select"
-                value={e.rate_id}
-                onChange={(ev) => updateEvents(i, 'rate_id', ev.target.value)}
-              >
-                {rateIds.map((id) => (
-                  <option key={id} value={id}>
-                    {id}
-                  </option>
-                ))}
-              </select>
+              <SelectWrap className="select-wrap-flex">
+                <select
+                  className="ui-select"
+                  value={e.event_type}
+                  onChange={(ev) => updateEvents(i, 'event_type', ev.target.value)}
+                >
+                  {EVENT_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </SelectWrap>
+              <SelectWrap className="select-wrap-flex">
+                <select
+                  className="ui-select"
+                  value={e.rate_id}
+                  onChange={(ev) => updateEvents(i, 'rate_id', ev.target.value)}
+                >
+                  {rateIds.map((id) => (
+                    <option key={id} value={id}>
+                      {id}
+                    </option>
+                  ))}
+                </select>
+              </SelectWrap>
               <button type="button" className="btn" onClick={() => removeEvent(i)}>
                 ×
               </button>
@@ -272,21 +277,23 @@ export default function SchemeEditor() {
       <div className="card">
         <div className="field" style={{ maxWidth: 320 }}>
           <label>Файл схемы</label>
-          <select
-            className="ui-select"
-            value={filename}
-            onChange={(e) => {
-              setFilename(e.target.value);
-              loadScheme(e.target.value);
-            }}
-            disabled={loading}
-          >
-            {files.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
+          <SelectWrap>
+            <select
+              className="ui-select"
+              value={filename}
+              onChange={(e) => {
+                setFilename(e.target.value);
+                loadScheme(e.target.value);
+              }}
+              disabled={loading}
+            >
+              {files.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </SelectWrap>
         </div>
         <div className="btn-row">
           <button type="button" className="btn btn-primary" onClick={saveFromForm}>
