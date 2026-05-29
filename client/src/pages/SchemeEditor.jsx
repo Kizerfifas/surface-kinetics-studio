@@ -251,7 +251,7 @@ export default function SchemeEditor() {
         <code>surface-atoms/configs/</code>. Одна схема используется для всех элементов из{' '}
         <Link to="/config">config.yaml</Link> (N, O, …): в каждой формуле подставляются Edes, Er,
         agDensity и T выбранного элемента. Переменные: F_density, S_density, T, atomFlux, Edes,
-        Edif, Vdes, Vdif, Er, Erlh; функции exp, log.
+        Edif, Vdes, Vdif, Er, Erlh; в events — lambda_expr для λ BKL; функции exp, log.
       </p>
 
       {error && <div className="alert alert-error">{error}</div>}
