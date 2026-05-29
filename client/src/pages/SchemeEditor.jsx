@@ -115,28 +115,42 @@ function SchemeForm({ scheme, onChange }) {
 
       <section className="card">
         <h3>События BKL (events)</h3>
+        <p className="hint" style={{ marginTop: 0 }}>
+          <code>lambda_expr</code> — формула λ (опционально). Переменные: free_F_sites, free_S_sites,
+          atoms_on_F, atoms_on_S, r1–r7, F_density, S_density, atomFlux, T. Пусто — значение по
+          умолчанию для event_type.
+        </p>
         {(scheme.events || []).map((e, i) => (
-          <div key={i} className="scheme-row">
-            <select
-              value={e.event_type}
-              onChange={(ev) => updateEvents(i, 'event_type', ev.target.value)}
-            >
-              {EVENT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <select value={e.rate_id} onChange={(ev) => updateEvents(i, 'rate_id', ev.target.value)}>
-              {rateIds.map((id) => (
-                <option key={id} value={id}>
-                  {id}
-                </option>
-              ))}
-            </select>
-            <button type="button" className="btn" onClick={() => removeEvent(i)}>
-              ×
-            </button>
+          <div key={i} className="event-block">
+            <div className="scheme-row">
+              <select
+                value={e.event_type}
+                onChange={(ev) => updateEvents(i, 'event_type', ev.target.value)}
+              >
+                {EVENT_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+              <select value={e.rate_id} onChange={(ev) => updateEvents(i, 'rate_id', ev.target.value)}>
+                {rateIds.map((id) => (
+                  <option key={id} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </select>
+              <button type="button" className="btn" onClick={() => removeEvent(i)}>
+                ×
+              </button>
+            </div>
+            <input
+              className="mono"
+              value={e.lambda_expr || ''}
+              onChange={(ev) => updateEvents(i, 'lambda_expr', ev.target.value)}
+              placeholder="lambda_expr (например free_F_sites * r1)"
+              style={{ width: '100%', marginTop: '0.35rem' }}
+            />
           </div>
         ))}
         <button type="button" className="btn" onClick={addEvent}>
