@@ -1,0 +1,13 @@
+label: Азот N на SiO₂
+description: Кинетические параметры N из Marinov et al. (2017), отчёт по практике.
+element:
+  name: N
+  mass: 14
+  edes: 51000
+  edif: 25500
+  vdes: 1.0e15
+  vdif: 1.0e13
+  er: 14000
+  erlh: 0
+  agDensity: 8.0e14
+  sort: 1

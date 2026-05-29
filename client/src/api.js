@@ -33,6 +33,21 @@ export const api = {
     request('/config/yaml', { method: 'POST', body: JSON.stringify({ yaml }) }),
   applyConfigPreset: (preset) =>
     request(`/config/preset/${preset}`, { method: 'POST' }),
+  listDatabases: () => request('/databases'),
+  getDatabase: (id) => request(`/databases/${encodeURIComponent(id)}`),
+  applyDatabase: (id, body = {}) =>
+    request(`/databases/${encodeURIComponent(id)}/apply`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  atomFlux: (mass, agDensity, temperature) =>
+    request('/physics/atom-flux', {
+      method: 'POST',
+      body: JSON.stringify({ mass, agDensity, temperature }),
+    }),
+  listSweeps: () => request('/sweeps'),
+  goSweep: (body) =>
+    request('/go/sweep', { method: 'POST', body: JSON.stringify(body) }),
   combineResults: () => request('/go/combine-results', { method: 'POST' }),
   goBuild: () => request('/go/build', { method: 'POST' }),
   goTest: () => request('/go/test', { method: 'POST' }),

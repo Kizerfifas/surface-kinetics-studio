@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import SweepPanel from '../components/SweepPanel';
 
 function configSummary(config) {
   if (!config) return null;
@@ -121,9 +122,18 @@ export default function RunPanel() {
         </div>
       )}
 
+      <SweepPanel
+        elements={simConfig?.elements}
+        simulationTime={simulationTime}
+        onLog={(chunk) => setLog((prev) => prev + chunk)}
+        onDone={() => {
+          api.listResults().catch(() => {});
+        }}
+      />
+
       <div className="grid-2">
         <div className="card">
-          <h3>Параметры</h3>
+          <h3>Одиночный прогон</h3>
           <div className="field">
             <label>Температура, K</label>
             <input

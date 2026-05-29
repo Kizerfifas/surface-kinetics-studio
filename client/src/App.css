@@ -668,6 +668,55 @@ table.data th {
   background: #fff;
 }
 
+.db-preview {
+  max-height: 200px;
+  overflow: auto;
+  font-size: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-input);
+  border-radius: 8px;
+  margin: 0.75rem 0;
+}
+
+.sweep-card fieldset.sweep-range {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.sweep-card legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0 0.35rem;
+}
+
+.sweep-table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.sweep-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.sweep-table th,
+.sweep-table td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+
+.sweep-table th {
+  background: var(--bg-input);
+}
+
+.sweep-table tr.sweep-fail {
+  background: color-mix(in srgb, var(--danger, #c44) 12%, transparent);
+}
+
 @media (max-width: 900px) {
   .grid-2,
   .grid-3,

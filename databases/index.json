@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "id": "silica_consts",
+      "file": "consts/silica_marinov.yaml",
+      "kind": "consts",
+      "label": "SiO₂ — плотности F/S (Marinov)"
+    },
+    {
+      "id": "marinov_N",
+      "file": "elements/marinov_N.yaml",
+      "kind": "element",
+      "label": "N — Marinov et al. (2017)"
+    },
+    {
+      "id": "marinov_O",
+      "file": "elements/marinov_O.yaml",
+      "kind": "element",
+      "label": "O — Marinov et al. (2017)"
+    },
+    {
+      "id": "preset_n_o",
+      "file": "presets/marinov_n_o.yaml",
+      "kind": "full",
+      "label": "N + O — полный пресет Marinov"
+    }
+  ]
+}

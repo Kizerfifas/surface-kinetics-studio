@@ -1,0 +1,13 @@
+label: Кислород O на SiO₂
+description: Кинетические параметры O из Marinov et al. (2017).
+element:
+  name: O
+  mass: 16
+  edes: 55000
+  edif: 27500
+  vdes: 1.0e13
+  vdif: 1.0e11
+  er: 16000
+  erlh: 2000
+  agDensity: 2.0e14
+  sort: 2

@@ -28,6 +28,12 @@ import {
   presetTwoComponent,
   CHECK_PARAM_NAMES,
 } from './simConfig.js';
+import {
+  listDatabaseEntries,
+  getDatabaseEntry,
+  applyDatabaseEntry,
+} from './databases.js';
+import { runParameterSweep, computeAtomFlux } from './sweep.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -144,6 +150,78 @@ app.post('/api/config/preset/:name', async (req, res) => {
     if (!preset) return res.status(400).json({ error: 'Unknown preset (single | two)' });
     const out = await writeSimConfig(preset);
     res.json(out);
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// --- Parameter databases ---
+app.get('/api/databases', async (_req, res) => {
+  try {
+    res.json({ entries: await listDatabaseEntries() });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/databases/:id', async (req, res) => {
+  try {
+    res.json(await getDatabaseEntry(req.params.id));
+  } catch (e) {
+    res.status(404).json({ error: e.message });
+  }
+});
+
+app.post('/api/databases/:id/apply', async (req, res) => {
+  try {
+    const { elementName } = req.body || {};
+    res.json(await applyDatabaseEntry(req.params.id, { elementName }));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+app.post('/api/physics/atom-flux', (req, res) => {
+  try {
+    const { mass, agDensity, temperature } = req.body || {};
+    const T = Number(temperature);
+    const m = Number(mass);
+    const n = Number(agDensity);
+    if (![T, m, n].every(Number.isFinite)) {
+      return res.status(400).json({ error: 'mass, agDensity, temperature required' });
+    }
+    res.json({ atomFlux: computeAtomFlux(m, n, T) });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// --- Parameter sweep ---
+app.get('/api/sweeps', async (_req, res) => {
+  try {
+    const dir = path.join(__dirname, '../data/sweeps');
+    let files = [];
+    try {
+      files = (await fs.readdir(dir)).filter((f) => f.endsWith('.json')).sort().reverse();
+    } catch {
+      files = [];
+    }
+    res.json({ files });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/go/sweep', async (req, res) => {
+  try {
+    const result = await runParameterSweep(req.body || {});
+    res.json({
+      success: result.successCount === result.runs.length,
+      successCount: result.successCount,
+      total: result.runs.length,
+      manifestPath: result.manifestPath,
+      runs: result.runs,
+    });
   } catch (e) {
     res.status(400).json({ error: e.message });
   }

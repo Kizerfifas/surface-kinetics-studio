@@ -1,0 +1,27 @@
+label: Двухкомпонентная система N + O
+description: Полная конфигурация consts + elements как в config по умолчанию (Marinov).
+consts:
+  fDensity: 1.5e15
+  sDensity: 3e12
+  fi: 0.002
+elements:
+  - name: N
+    mass: 14
+    edes: 51000
+    edif: 25500
+    vdes: 1.0e15
+    vdif: 1.0e13
+    er: 14000
+    erlh: 0
+    agDensity: 8.0e14
+    sort: 1
+  - name: O
+    mass: 16
+    edes: 55000
+    edif: 27500
+    vdes: 1.0e13
+    vdif: 1.0e11
+    er: 16000
+    erlh: 2000
+    agDensity: 2.0e14
+    sort: 2

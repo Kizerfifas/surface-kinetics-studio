@@ -1,0 +1,6 @@
+label: SiO₂ — плотности центров F и S
+description: Плотности сайтов для схемы Marinov на кварцевом стекле (см⁻²).
+consts:
+  fDensity: 1.5e15
+  sDensity: 3e12
+  fi: 0.002

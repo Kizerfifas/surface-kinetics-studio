@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../api';
 import SelectWrap from '../components/SelectWrap';
+import DatabasePanel from '../components/DatabasePanel';
 
 const CHECK_PARAM_NAMES = ['densityF', 'densityS', 'density', 'atomsOnSurface'];
 
@@ -318,6 +319,17 @@ export default function ConfigEditor() {
           </button>
         </div>
       </div>
+
+      <DatabasePanel
+        elements={config.elements}
+        onApplied={async (c) => {
+          if (c) setConfig(c);
+          const { config: fresh, text } = await api.getConfig();
+          setConfig(fresh);
+          setYamlText(text);
+          setMessage('База параметров записана в config.yaml');
+        }}
+      />
 
       <div className="tabs">
         <button type="button" className={tab === 'form' ? 'active' : ''} onClick={() => setTab('form')}>
