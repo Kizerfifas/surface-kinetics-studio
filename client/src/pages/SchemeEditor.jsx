@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api';
+import ExpressionField from '../components/ExpressionField';
 
 const EVENT_TYPES = [
   'adsorption_F',
@@ -57,30 +58,32 @@ function SchemeForm({ scheme, onChange }) {
     onChange({ ...scheme, events: scheme.events.filter((_, i) => i !== idx) });
   };
 
-  const rateIds = (scheme.rates || []).map((r) => r.id);
+  const rateIds = (scheme.rates || []).map((r) => r.id).filter(Boolean);
 
   return (
     <div className="scheme-form">
       <section className="card">
         <h3>Скорости (rates)</h3>
         {(scheme.rates || []).map((r, i) => (
-          <div key={i} className="scheme-row">
-            <input
-              value={r.id}
-              onChange={(e) => updateRates(i, 'id', e.target.value)}
-              placeholder="id"
-              style={{ width: '4rem' }}
+          <div key={i} className="expr-row-block">
+            <div className="scheme-row expr-row-head">
+              <input
+                value={r.id}
+                onChange={(e) => updateRates(i, 'id', e.target.value)}
+                placeholder="id"
+                style={{ width: '4rem' }}
+              />
+              <button type="button" className="btn" onClick={() => removeRate(i)} title="Удалить">
+                ×
+              </button>
+            </div>
+            <ExpressionField
+              value={r.expr || ''}
+              onChange={(expr) => updateRates(i, 'expr', expr)}
+              context="rate"
+              rateIds={rateIds.slice(0, i)}
+              placeholder="например atomFlux / (F_density + S_density)"
             />
-            <input
-              className="mono"
-              value={r.expr}
-              onChange={(e) => updateRates(i, 'expr', e.target.value)}
-              placeholder="expr"
-              style={{ flex: 1 }}
-            />
-            <button type="button" className="btn" onClick={() => removeRate(i)} title="Удалить">
-              ×
-            </button>
           </div>
         ))}
         <button type="button" className="btn" onClick={addRate}>
@@ -91,21 +94,24 @@ function SchemeForm({ scheme, onChange }) {
       <section className="card">
         <h3>Вероятности (probabilities)</h3>
         {(scheme.probabilities || []).map((p, i) => (
-          <div key={i} className="scheme-row">
-            <input
-              value={p.id}
-              onChange={(e) => updateProbs(i, 'id', e.target.value)}
-              style={{ width: '6rem' }}
+          <div key={i} className="expr-row-block">
+            <div className="scheme-row expr-row-head">
+              <input
+                value={p.id}
+                onChange={(e) => updateProbs(i, 'id', e.target.value)}
+                style={{ width: '6rem' }}
+              />
+              <button type="button" className="btn" onClick={() => removeProb(i)}>
+                ×
+              </button>
+            </div>
+            <ExpressionField
+              value={p.expr || ''}
+              onChange={(expr) => updateProbs(i, 'expr', expr)}
+              context="probability"
+              rateIds={rateIds}
+              placeholder="например exp(-Er / (8.31 * T))"
             />
-            <input
-              className="mono"
-              value={p.expr}
-              onChange={(e) => updateProbs(i, 'expr', e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <button type="button" className="btn" onClick={() => removeProb(i)}>
-              ×
-            </button>
           </div>
         ))}
         <button type="button" className="btn" onClick={addProb}>
@@ -116,9 +122,8 @@ function SchemeForm({ scheme, onChange }) {
       <section className="card">
         <h3>События BKL (events)</h3>
         <p className="hint" style={{ marginTop: 0 }}>
-          <code>lambda_expr</code> — формула λ (опционально). Переменные: free_F_sites, free_S_sites,
-          atoms_on_F, atoms_on_S, r1–r7, F_density, S_density, atomFlux, T. Пусто — значение по
-          умолчанию для event_type.
+          <code>lambda_expr</code> — формула λ BKL. Пусто — значение по умолчанию для{' '}
+          <code>event_type</code>.
         </p>
         {(scheme.events || []).map((e, i) => (
           <div key={i} className="event-block">
@@ -144,12 +149,13 @@ function SchemeForm({ scheme, onChange }) {
                 ×
               </button>
             </div>
-            <input
-              className="mono"
+            <ExpressionField
               value={e.lambda_expr || ''}
-              onChange={(ev) => updateEvents(i, 'lambda_expr', ev.target.value)}
-              placeholder="lambda_expr (например free_F_sites * r1)"
-              style={{ width: '100%', marginTop: '0.35rem' }}
+              onChange={(expr) => updateEvents(i, 'lambda_expr', expr)}
+              context="lambda"
+              rateIds={rateIds}
+              placeholder="например free_F_sites * r1"
+              rows={1}
             />
           </div>
         ))}
@@ -248,10 +254,9 @@ export default function SchemeEditor() {
       <h1 className="page-title">Редактор схемы</h1>
       <p className="page-desc">
         Кинетическая схема для surface-atoms. Сохраняется в{' '}
-        <code>surface-atoms/configs/</code>. Одна схема используется для всех элементов из{' '}
-        <Link to="/config">config.yaml</Link> (N, O, …): в каждой формуле подставляются Edes, Er,
-        agDensity и T выбранного элемента. Переменные: F_density, S_density, T, atomFlux, Edes,
-        Edif, Vdes, Vdif, Er, Erlh; в events — lambda_expr для λ BKL; функции exp, log.
+        <code>surface-atoms/configs/</code>. Одна схема для всех элементов из{' '}
+        <Link to="/config">config.yaml</Link> — в формулах подставляются Edes, Er, agDensity, T.
+        В полях выражений: автодополнение, шаблоны Marinov, кнопки <code>exp</code> и операторов.
       </p>
 
       {error && <div className="alert alert-error">{error}</div>}
