@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import * as XLSX from 'xlsx';
+import readXlsxFile from 'read-excel-file/node';
 import { SURFACE_ATOMS_PATH } from './config.js';
 
 /** List result directories: "result YYYY-MM-DD HH_MM_SS T300K" */
@@ -50,12 +50,10 @@ export async function parseResultXlsx(runId) {
   if (!xlsxName) return null;
 
   const buf = await fs.readFile(path.join(dir, xlsxName));
-  const wb = XLSX.read(buf, { type: 'buffer' });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
-  if (rows.length < 2) return { headers: [], data: [] };
+  const rows = await readXlsxFile(buf);
+  if (rows.length < 2) return { headers: [], data: [], sheetName: 'Sheet1' };
 
-  const headers = rows[0].map(String);
+  const headers = rows[0].map((h) => (h == null ? '' : String(h)));
   const data = rows.slice(1).map((row) => {
     const obj = {};
     headers.forEach((h, i) => {
@@ -65,7 +63,7 @@ export async function parseResultXlsx(runId) {
     return obj;
   });
 
-  return { headers, data, sheetName: wb.SheetNames[0] };
+  return { headers, data, sheetName: 'Sheet1' };
 }
 
 const PREFERRED_CHART_KEYS = [
